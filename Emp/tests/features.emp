@@ -1,0 +1,165 @@
+
+// Let the compiler know to save the first byte for flags
+#[flags_at_1b]
+static variable: uint32 = 0x1babcd12;
+
+// Let the compiler know to save the first 2, 3, 4 or 8 bytes
+// #[flags_at_1b] - Save first byte
+// #[flags_at_2b] - Save first two bytes
+// #[flags_at_4b] - Save first four bytes
+// #[flags_only]  - Use the entirety of memory for flags
+
+// #[instant] lets the compiler know the current code/function has a direct affect on the compiler or a program outside of the compiler
+// `require_all` tells the compiler every field of a struct is required
+// `require` is a keyword that tells the compiler something is required in a struct/function
+//	You can use `require` in function arguments to make sure a specific argument is passed.
+//	By default, functions args in Emp are optional.
+//	ToDo: Change this?
+// #[ignore] lets the compiler know to completely skip the next line of code
+// #[ignore_function] lets the compiler know to ignore the entire function
+
+// #[arch=archType] tells the compiler what architecture we're compiling for
+// `package filename` packages all the source code within the given file, and `compiled` it into a custom bytecode that the compiler can easily unpackage and read
+//	A package is a clump, multiple clumps or an entire file of code that is translated into Emps Custome Bytecode for Packages(ECBP).
+//	ECBP is custom bytecode that the compiler is programmed to easily read and "unpackage" all the code. Since this isn't machine code, a ECBP generated
+//	binary file will (most likely) be larger in size, thus requiring more attention to memory usage within a project.
+//	ECBP was created for simplicity with packages in Emp. The package system in Emp wants a package to not be compiled alone, but rather, be compiled as part
+//	of the actual source code. So, to bypass compiling a package to machine code, I created my own file format/custom bytecode for the compiler to "compile" a
+//	package into a custom binary-type file.
+//	Simply Put It: Packages are not source code, they are "collections" of code that will reside/be used inside an actual source-code file.
+//		       Packages, upon importation, will be "unpackaged" and all the code will be available. Upon "unpackaging", the binary ECBP file is deleted.
+// A source-code file can store multiple packages
+// The source-code file will be compiled to the according machine code depending on the target architecture.
+// The packages within the source-code file will get a ECBP binary file with the source-code filename included in the name. This is an example:
+//	source-code file: sfile.emp
+//	ECBP file generated from individual packages located in sfile.emp: sfile_pkgs.ecbp
+// The compiler will "assemble" together the ECBP binary file in a way that the compiler can also "disassemble" when included in a source-code file.
+// The ECBP binary file will look differently than a code-file that is one package of-itself. The ECBP binary file will include multiple different chunks
+// that describe each individual package the compiler finds within the source-code file.
+// Meanwhile, for a code-file that is one package, the ECBP binary file will hold data only for the file, and there will not be more than one "package" chunk.
+
+
+// Safe macros: Be explicit with compiler. Memory safe! ToDo: What will the syntax look like?
+// Unsafe Macros: C-like macro
+
+// Do we want this?
+// #[c_types] tells the compiler we want to use the data types C/C++ use
+// #[rust_types] tells the compiler we want to use the data types Rust has
+
+// #[required_methods=method,names,separated,by,comma] tells the compiler that the following ideal(struct/class)
+//	requires specific methods to be called throughout the programs lifetime. It also tells the compiler
+//	what methods need to be implemented for the specific class/struct.
+// #[uses=methods,that,will,be,used,separated,by,comma] tells the compiler that the following function, struct etc
+// 	uses specific ideals. The compiler will, thusly, error if these specific methods/function calls
+//	(or whatever they are) are not present.
+// #[memory=allow_attr] tells the compiler what things can be done with memory(copying the memory, transfering memory address etc).
+//	allow_copy - The memory of whatever it is will be capable of being copied by another variable.
+//		     This forces you to watch your memory a bit more.
+//	allow_transfer - The memory of whatver it is will be capable of moving from one memory location to another
+//	packed - The memory address takes up as little memory as possible
+//	shared - The memory address will eventually be transfered to another address and destroyed.
+//		 `shared` is used mainly with structs. When you finally `transfer` the memory address to the next struct,
+//		 the struct must contain the data of which the `shared` struct contains.
+//		 This helps with many things. Example, we might need a struct with little data to do one thing before we init another struct
+//		 that requires the same data. So, instead of getting rid of the memory and re-allocating, we simply "transfer" the address
+//		 of the struct with "shared" memory to the new struct that has the same data, and more.
+//		 If the memory is `shared`, the compiler requires the user to specify what the memory will eventually become.
+//		 This is done via `turns_to`.
+//		 Example:
+//		 #[memory=shared]
+//		 require_all struct Example turns_to Example2
+//		 {
+//			uint8	a;
+//			uint8	b;
+//		 } _Example2;
+//		 
+//		 #[inherits=Example]
+//		 #[memory=allow_copy,allow_transfer]
+//		 require_all struct Example2
+//		 {
+//			// Same data as `Example`
+//		 	uint8	a;
+//		 	uint8	b;
+//
+//			// New data
+//			uint8	c;
+//			uint8 	d;
+//		 }
+//		 Example, and it's address, will be used until `Example2` is initialized, then `Example` and it's address is "transfered" to Example2.
+//	boxed - The memory is statically allocated(stack allocated) until runtime. At runtime, the memory
+//		will become a `buffer` data type, and will be delt with via the compiler.
+//	open - This implies that the memory has the attributes allow_copy, allow_transfer. It also implies
+//	       that the memory is a `ptr` type.
+//	def_mem - The default memory is considered a `raw_ptr`. By default, all "pointers", or anything to do with memory, is a `raw_ptr`.
+//		  A `raw_ptr` is a ptr with a fixed address. A `raw_ptr` cannot be expanded upon. It cannot be decreased in size. Whatever
+//		  memory is available is all you get.
+//	By default, structs/classes etc are a `raw_ptr`. Upon initialization for memory, the compiler makes the memory address a `raw_ptr` until the user
+//	tells the compiler otherwise via the #[memory=] attribute.
+
+// Example
+#[required_methods=init,destory]
+#[uses=wr, fl]
+#[memory=allow_copy, allow_transfer]
+require_all struct SomeStruct
+{
+	
+}
+
+// The following function takes in a type of char, and tells the compiler to treat it as a integer
+// Note: If the variable type passed as a argument is unsigned, the type we tell the compiler to treat the variable as has to be unsigned aswell
+// Note: If the variable type passed as a argument is a ptr, the type we tell the compiler to treat the variable as has to be a ptr as well
+fn something(var1 u8)
+	treat var1 as u32
+{
+	// lets say `var1` has a value of 'a'
+	//	var1 = 01000001
+	// Now, `var1` has the value 01000001 00000000 00000000 00000000
+	// The first byte is reserved throughout the function. So, anytime the variable
+	// changes, the first byte is always 'a'. This is where useful techniques come in, such as doing:
+	var2: u8 ptr = var1;
+
+	// In Emp, if you have a type that is larger than the variable being assigned to it, the compiler
+	// assigns only that much bytes(depending on the variables data type) to the variable.
+	// So, since the compiler is treating `var1` as a u32 in the function `something`, the compiler
+	// sees `var2` only has access to a single byte, thus it assigns only the first byte of the `u32` type `var1`,
+	// thus, `var2` now equals 'a'. Not just that, we also tell the compiler `var2` is a `u8 ptr`, meaning
+	// `var2` points to the address of the first byte, thus `var2` now points to the original address of `var1`.
+	// This is how you can change the original value. Now, if we do:
+	*var2 = 'b';
+	
+	// The first byte of `var1` will be 'b', and the `u32` reference of `var1` that exists during the function lifetime(unless returned) is now: 01000010 00000000 00000000 00000000
+	// Again, if the function `something` returns the `u32` reference of `var1`, the variable assigned to the return
+	// of the function `something` will obtain the given amount of bytes from the `u32` reference of `var1`.
+	// Another words, if we have a `u8` variable `var3` assigned to the return value of `something`, `var3` will
+	// store the value 'b', and `var3` will obtain the "extended memory" that `var1` inherited within the function `something` so it could store a 4-byte value.
+}
+
+// Example(ignore the fact we don't have a main function lol):
+var1: u8 = 'a';
+var2: u8 = something(var1);
+
+// Lets say `something(var1)` returns 01000010 01000001 01100110 00000001
+// `var2` will have the value 01000010 assigned to it('b')
+// If we do:
+var2 = (var2 >> 8) & 0xFF;
+// `var2` will now have the value 01000001 assigned to it('a')
+var2 = (var2 >> 24) & 0xFF;
+// `var2` will now have the value 00000001
+// OR, if we want to access any of the extended memory, should we do:
+//	var2 = access_extended_memory(variable, byte, size);
+// where `variable` is the varibale that stores the "extended memory", and `byte` is the index in the extended memory that we want to begin at, and `size`
+// is the total amount of bytes we want to obtain(return from the function).
+// So, if we tell `access_extended_memory` to start at byte 2, the `size` can only be 2 since there is no more than 2 bytes left in the extended memory.
+// If we tell the `access_extended_memory` function to access a size greater than a variable(assigning 2 bytes to a u8, for example), 
+// the compiler will default the size to the variable size.
+// If we tell the `access_extended_memory` function to access a size that would surpass the size of the "extended memory", then the compiler will return
+// the rest of the value of the extended memory. For example:
+//	var2 = access_extended_memory(var2, 2, 2);
+// We tell `access_extended_memory` to begin at the second byte of the extended memory of variable `var2`, and to return 2 bytes.
+// However, `var2` is a `u8`, so the compiler will, in theory, only return the third byte of the variables extended memory.
+// Remember: the `byte` argument tells the `access_extended_memory` function where to start at in the extended memory. The function thus returns x amount of              bytes(size) that follows after the beginning byte
+// Another example(assuming var2 is a u32):
+//	var2 = access_extended_memory(var2, 2, 4);
+// We tell `access_extended_memory` to start at the second byte of the extended memory and to return the next 4 bytes. However, that goes 2 bytes above the
+// total extended memory possible. So, `access_extended_memory` will return only 2 bytes to `var2` instead of 4 since there was not 4 bytes left in the extended memory
+// to return.
