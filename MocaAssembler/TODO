@@ -1,0 +1,6 @@
+mov         -> 0xA0
+keep        -> 0xA1
+byte        -> 0xA2
+word        -> 0xA3
+dword       -> 0xA4
+ax, ah, al  -> 0xC0

@@ -1,0 +1,66 @@
+#use "standard_io"
+
+// A typeclass is a class that gives a name to a constant value.
+// There are two ways we can do this, one: typeclass only one specific type
+typeclass myAge = 18;
+// Or, we can typeclass multiple values
+typeclass {
+	myAge = 18,
+	bobsAge = 90
+};
+// If you want to do something like typeclassName::name, the syntax would be:
+typeclass Ages {
+	myAge = 18,
+	bobsAge = 90
+}; // If we want to access myAge or bobsAge, we now have to put Ages:: in front of the names.
+
+// An opclass is what we call an "open" class. An "open" class can have any type of method,
+// structure, enum, typeclass etc, and it does not have to be implied for a struct/enum:
+opclass MyClass
+{
+	pub enum Something {
+		hey,
+		bye -> string
+	};
+	// If there is an enum/structure inside an opclass, we can imply specific methods for specific ideals:
+	pub void SayBye(enum Something s) for Something
+	{
+		if s == hey
+			stdio_error("Expected `bye` :c");
+
+		Something::bye("Bye!!");
+	}
+
+	pub void SayHi()
+	{
+		stdio_write("Hello, World!");
+	}
+}
+
+enum SomethingElse
+{
+	a,
+	b,
+	c
+};
+
+// A normal class has to be implied for a structure or enum
+class AnotherClass for SomethingElse
+{
+
+}
+
+// For enums, if you want a enum variable to store more than one thing, do:
+enum Example
+{
+	Error1 -> string & ui32,
+	// If you want to have two types that can be two different types themselves, do:
+	Error2 -> string | char && ui16 | ui32,
+	// This introduces a flexible way to assign arguments to each element of an enum, we can also do:
+	Error3 -> string & char && ui16 | ui32
+	// Error3 takes in (string, char, ui16 | ui32).
+	// && tells the compiler we are appending another argument.
+	// || tells the compiler to expect either or type of arguments, for example:
+	Error4 -> string & ui32 || string & ui16
+	// Error4 takes in (string, ui32) or (string, ui16).
+}

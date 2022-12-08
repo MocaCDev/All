@@ -1,0 +1,4 @@
+format:
+  drive_type: "floppy"
+  sect_size: 512
+  dimg: "OS.bin"
