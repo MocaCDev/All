@@ -1,0 +1,9 @@
+use16
+org 0x8000
+
+data:
+	name	db 0x0
+	name2	db 0x0
+	name3	db 0x0
+
+times 512 - ($ - $$) db 0x0
