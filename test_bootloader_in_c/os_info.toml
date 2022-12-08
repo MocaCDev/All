@@ -1,0 +1,14 @@
+[boot]
+version = '0.0.1'
+name = "MyOS"
+bootloader = 'bootloader.c'
+bin = 'OS.bin'
+
+[kernel]
+kernel_path = 'kernel.c'
+kernel_linker = 'kernel.ld'
+# entry_point is the name for the "main" function of the kernel
+kernel_entry_point = '__kernel_main'
+# kernel_address is the physical address the kernel is located at
+kernel_address = 0x1BADB00
+libs = []

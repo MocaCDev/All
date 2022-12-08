@@ -1,0 +1,52 @@
+#ifndef MocEmulator_Assembler
+#define MocEmulator_Assembler
+#include "../common.hpp"
+#include "bytecode.hpp"
+#include "lang/parser.hpp"
+
+namespace MocAssembler
+{
+	using namespace MocParser;
+	using namespace MocLexer;
+	using namespace MocBytecode;
+	
+	typedef struct AssemblerData
+	{
+		UNS8	*val;
+
+		// What is the instruction?
+		enum instructions instruction; 
+	} _AssemblerData;
+
+	// AssemblerResp will be filled out throughout the instruction.
+	// The assemblers response will just help us figure out what registers we should expect
+	typedef struct AssemblerResp
+	{
+		
+	} _AssemblerResp;
+
+	class Assembler
+	{
+	private:
+		// Setting the assemblers instance of the parser and lexer to NULL
+		Parser::_MParser *_par = NULL;
+		Lexer::_MLexer *_lex = NULL;
+
+		// Structure to hold basic information about the assembler, such as the amount of bytecodes, sizes etc
+		typedef struct AssemblerInfo
+		{
+			
+		} _AsmInfo;
+	public:
+		// Assign the instances of the parser and lexer
+		Assembler()
+		{
+			_par = new Parser::_MParser;
+			_lex = new Lexer::_MLexer;
+		}
+
+		
+	};
+}
+
+#endif
